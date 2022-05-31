@@ -1,0 +1,298 @@
+import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart' as _toast;
+import 'package:get/get.dart' as _getx;
+
+import 'colors.dart';
+import 'custom_text.dart';
+
+class DInfo {
+  /// dialog for chek confirmation
+  /// return true if yes
+  /// retun false if no
+  static Future<bool> dialogConfirmation(
+    BuildContext context,
+    String title,
+    String content, {
+    String textNo = 'No',
+    String textYes = 'Yes',
+  }) async {
+    return await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(content),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(textNo),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(textYes),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// dialog for response error
+  /// not automatically closed, so you have to use DInfo.close() after this
+  static void dialogError(BuildContext context, String message) {
+    _getx.Get.dialog(
+      SimpleDialog(
+        children: [
+          Center(
+            child: Icon(
+              Icons.error_outline_outlined,
+              color: Colors.red[700],
+              size: 40,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 10),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Container(
+              width: 70,
+              padding: const EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: bleuClaire(),
+              ),
+              child: CustomText(
+                'fermer',
+                color: blanc(),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ],
+      ),
+      barrierDismissible: true,
+    );
+  }
+
+  /// dialog for response success
+  /// not automatically closed, so you have to use DInfo.close() after this
+  static void dialogSuccess(BuildContext context, String message) {
+    _getx.Get.dialog(
+      SimpleDialog(
+        children: [
+          Center(
+            child: Icon(
+              Icons.check_circle_outline_outlined,
+              color: Colors.green[700],
+              size: 40,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: CustomText(
+              ' ok ',
+              color: bleuClaire(),
+            ),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  /// dialog for response custom icon
+  /// not automatically closed, so you have to use DInfo.close() after this
+  static void dialogNetral(String message, {IconData? icon}) {
+    _getx.Get.dialog(
+      SimpleDialog(
+        children: [
+          if (icon != null)
+            Center(
+              child: Icon(
+                icon,
+                color: Colors.blue[700],
+                size: 40,
+              ),
+            ),
+          if (icon != null) const SizedBox(height: 16),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  /// close dialog and callback
+  static void closeDialog(int i,
+      {Duration? durationBeforeClose, Function? actionAfterClose}) {
+    durationBeforeClose = Duration(milliseconds: i);
+    Future.delayed(
+      durationBeforeClose,
+      () {
+        _getx.Get.back();
+        if (actionAfterClose != null) actionAfterClose.call();
+      },
+    );
+  }
+
+  /// fast response for error with automatically close
+  static void toastError(String message, {bool isLong = false}) {
+    _toast.Fluttertoast.showToast(
+      msg: message,
+      toastLength:
+          isLong ? _toast.Toast.LENGTH_LONG : _toast.Toast.LENGTH_SHORT,
+      gravity: _toast.ToastGravity.CENTER,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.red[100],
+      textColor: Colors.red[900],
+      fontSize: 16,
+    );
+  }
+
+  /// fast response for success with automatically close
+  static void toastSuccess(String message, {bool isLong = false}) {
+    _toast.Fluttertoast.showToast(
+      msg: message,
+      toastLength:
+          isLong ? _toast.Toast.LENGTH_LONG : _toast.Toast.LENGTH_SHORT,
+      gravity: _toast.ToastGravity.CENTER,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.green[100],
+      textColor: Colors.green[900],
+      fontSize: 16,
+    );
+  }
+
+  /// fast response for netral with automatically close
+  static void toastNetral(String message, {bool isLong = false}) {
+    _toast.Fluttertoast.showToast(
+      msg: message,
+      toastLength:
+          isLong ? _toast.Toast.LENGTH_LONG : _toast.Toast.LENGTH_SHORT,
+      gravity: _toast.ToastGravity.CENTER,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.blue[100],
+      textColor: Colors.blue[900],
+      fontSize: 16,
+    );
+  }
+
+  /// close current active toast
+  static void closeToast() {
+    _toast.Fluttertoast.cancel();
+  }
+
+  /// response below of ui for error with automatically close
+  static void snackBarError(String message) {
+    _getx.Get.rawSnackbar(
+      messageText: Text(
+        message,
+        style: TextStyle(color: Colors.red[900]),
+      ),
+      snackStyle: _getx.SnackStyle.FLOATING,
+      backgroundColor: Colors.red[100]!,
+    );
+  }
+
+  /// response below of ui for success with automatically close
+  static void snackBarSuccess(String message) {
+    _getx.Get.rawSnackbar(
+      messageText: Text(
+        message,
+        style: TextStyle(color: Colors.green[900]),
+      ),
+      snackStyle: _getx.SnackStyle.FLOATING,
+      backgroundColor: Colors.green[100]!,
+    );
+  }
+
+  /// response below of ui for netral with automatically close
+  static void snackBarNetral(String message) {
+    _getx.Get.rawSnackbar(
+      messageText: Text(
+        message,
+        style: TextStyle(color: Colors.blue[900]),
+      ),
+      snackStyle: _getx.SnackStyle.FLOATING,
+      backgroundColor: Colors.blue[100]!,
+    );
+  }
+
+  /// you can use this to close current snackbar or notif
+  static void closeSnackBarOrNotif() {
+    _getx.Get.closeAllSnackbars();
+  }
+
+  /// response like notif for error
+  /// automatically close
+  static void notifError(
+    String title,
+    String message, {
+    double radius = 12,
+    bool showBorder = false,
+  }) {
+    _getx.Get.snackbar(
+      title,
+      message,
+      backgroundColor: Colors.red[100],
+      colorText: Colors.red[900],
+      borderColor: showBorder ? Colors.red[900] : Colors.transparent,
+      borderRadius: radius,
+      borderWidth: showBorder ? 1 : 0,
+      isDismissible: false,
+    );
+  }
+
+  /// response like notif for success
+  /// automatically close
+  static void notifSuccess(
+    String title,
+    String message, {
+    double radius = 12,
+    bool showBorder = false,
+  }) {
+    _getx.Get.snackbar(
+      title,
+      message,
+      backgroundColor: Colors.green[100],
+      colorText: Colors.green[900],
+      borderColor: showBorder ? Colors.green[900] : Colors.transparent,
+      borderRadius: radius,
+      borderWidth: showBorder ? 1 : 0,
+      isDismissible: false,
+    );
+  }
+
+  /// response like notif for netral
+  /// automatically close
+  static void notifNetral(
+    String title,
+    String message, {
+    double radius = 12,
+    bool showBorder = false,
+  }) {
+    _getx.Get.snackbar(
+      title,
+      message,
+      backgroundColor: Colors.blue[100],
+      colorText: Colors.blue[900],
+      borderColor: showBorder ? Colors.blue[900] : Colors.transparent,
+      borderRadius: radius,
+      borderWidth: showBorder ? 1 : 0,
+      isDismissible: false,
+    );
+  }
+}
