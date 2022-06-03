@@ -21,3 +21,4 @@ class CustomText extends Text {
           
         );
 }
+

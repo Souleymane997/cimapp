@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:cimapp/models/colors.dart';
 import 'package:flutter/material.dart';
 

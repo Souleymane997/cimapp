@@ -22,67 +22,70 @@ class _HomePageState extends State<HomePage> {
     super.initState();
   }
 
+   Future<bool> _onWillPop() async {
+    return false; //<-- SEE HERE
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        body: _child,
-        bottomNavigationBar : barNavigationBottom(),
-    ));
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: Scaffold(
+            body: _child,
+            bottomNavigationBar: barNavigationBottom(),
+          )),
+    );
   }
 
   Widget barNavigationBottom() {
     return BottomNavigationBar(
-            currentIndex: _selectedIndex,
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: blanc(),
-            selectedItemColor: bleuClaire(),
-            unselectedItemColor: gris(),
-            selectedFontSize: 13,
-            unselectedFontSize: 10,
-            showUnselectedLabels: false,
-            onTap: (value) {
-              setState(() {
-                _handleNavigationChange(value);
-                _selectedIndex = value;
-              });
-            },
-            items: const [
-              BottomNavigationBarItem(
-                icon: ImageIcon(
-                  AssetImage("images/home.png"),
-                  size: 30,
-                ),
-                label: "Home",
-              ),
-              BottomNavigationBarItem(
-                icon: ImageIcon(
-                  AssetImage("images/goal.png"),
-                  size: 30,
-                ),
-                label: "Mission",
-              ),
-              BottomNavigationBarItem(
-                icon: ImageIcon(
-                  AssetImage("images/notifs.png"),
-                  size: 30,
-                ),
-                label: 'Notifications',
-              ),
-              BottomNavigationBarItem(
-                icon: ImageIcon(
-                  AssetImage("images/menuH.png"),
-                  size: 30,
-                ),
-                label: 'Plus',
-              ),
-            ]);
+        currentIndex: _selectedIndex,
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: blanc(),
+        selectedItemColor: bleuClaire(),
+        unselectedItemColor: gris(),
+        selectedFontSize: 13,
+        unselectedFontSize: 10,
+        showUnselectedLabels: false,
+        onTap: (value) {
+          setState(() {
+            _handleNavigationChange(value);
+            _selectedIndex = value;
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: ImageIcon(
+              AssetImage("images/home.png"),
+              size: 30,
+            ),
+            label: "Home",
+          ),
+          BottomNavigationBarItem(
+            icon: ImageIcon(
+              AssetImage("images/goal.png"),
+              size: 30,
+            ),
+            label: "Mission",
+          ),
+          BottomNavigationBarItem(
+            icon: ImageIcon(
+              AssetImage("images/notifs.png"),
+              size: 30,
+            ),
+            label: 'Notifications',
+          ),
+          BottomNavigationBarItem(
+            icon: ImageIcon(
+              AssetImage("images/menuH.png"),
+              size: 30,
+            ),
+            label: 'Plus',
+          ),
+        ]);
   }
-
-
-
-
 
   void _handleNavigationChange(int index) {
     setState(() {
@@ -108,7 +111,4 @@ class _HomePageState extends State<HomePage> {
       );
     });
   }
-
-
-
 }

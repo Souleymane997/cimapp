@@ -1,9 +1,6 @@
 import 'package:cimapp/models/colors.dart';
 import 'package:cimapp/widgets/screens/homeScreens/detailsmission.dart';
 import 'package:cimapp/widgets/screens/homeScreens/listemission.dart';
-import 'package:cimapp/widgets/screens/homeScreens/missionencours.dart';
-import 'package:cimapp/widgets/screens/homeScreens/missiontermines.dart';
-import 'package:cimapp/widgets/screens/homeScreens/missionvalide.dart';
 import 'package:cimapp/widgets/screens/userScreens/user.dart';
 import 'package:flutter/material.dart';
 import 'package:expansion_tile_card/expansion_tile_card.dart';
@@ -193,17 +190,17 @@ class _DashbordPageState extends State<DashbordPage> {
                       Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            cardButton("images/list.png", "Liste des Missions",const ListeMission()),
-                            cardButton("images/task.png", "Mission Terminées", const MissionTermine()),
+                            cardButton("images/list.png", "Liste des Missions", const ListeMission(i:1,)),
+                            cardButton("images/task.png", "Mission Terminées", const ListeMission(i:2,)),
                           ]),
                       Container(height: 15.0),
                       Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             cardButton(
-                                "images/rotate.png", "Missions en Cours" , const MissionEnCours()),
+                                "images/rotate.png", "Missions en Cours" , const ListeMission(i:3,)),
                             cardButton(
-                                "images/termine.png", "Missions Validées", const MissionValide()),
+                                "images/termine.png", "Missions Validées", const ListeMission(i:4,)),
                           ]),
                       Container(height: 10.0),
                     ],
