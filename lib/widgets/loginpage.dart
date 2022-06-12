@@ -3,7 +3,6 @@ import 'package:cimapp/models/colors.dart';
 import 'package:cimapp/models/textfield.dart';
 import 'package:cimapp/modelsrequest/loginresponse.dart';
 import 'package:cimapp/widgets/hompage.dart';
-import 'package:cimapp/widgets/registerpage.dart';
 import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
@@ -45,7 +44,7 @@ class _LoginPageState extends State<LoginPage> {
           child: SafeArea(
             child: Stack(
               children: [
-                Background(),
+                bgGround(context),
                 loginContainer(),
               ],
             ),
@@ -108,55 +107,69 @@ class _LoginPageState extends State<LoginPage> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    InputContainer(
-                      child: TextFormField(
-                        controller: emailController,
-                        validator: (value) => EmailValidator.validate(value!)
-                            ? null
-                            : "Please enter a valid email",
-                        maxLines: 1,
-                        onSaved: (onSavedval) {
-                          emailController.text = onSavedval!;
-                        },
-                        decoration: InputDecoration(
-                          hintText: 'Enter your email',
-                          prefixIcon: const Icon(Icons.email),
-                          prefixIconColor: bleuClaire(),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      child: Padding(
+                        padding: const EdgeInsets.all(5.0),
+                        child: TextFormField(
+                          onChanged: (value) {},
+                          controller: emailController,
+                          validator: (value) => EmailValidator.validate(value!)
+                              ? null
+                              : "Please enter a valid email",
+                          maxLines: 1,
+                          onSaved: (onSavedval) {
+                            emailController.text = onSavedval!;
+                          },
+                          style: TextStyle(color: bleuClaire()),
+                          decoration: const InputDecoration(
+                              hintText: "Enter your email",
+                              prefixIcon: Icon(Icons.email),
+                              border: OutlineInputBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(70.0)))),
                         ),
                       ),
                     ),
                     const SizedBox(
                       height: 10,
                     ),
-                    InputContainer(
-                      child: TextFormField(
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your password';
-                          }
-                          return null;
-                        },
-                        maxLines: 1,
-                        controller: passwordController,
-                        onSaved: (onSavedval) {
-                          passwordController.text = onSavedval!;
-                        },
-                        obscureText: isHidden,
-                        decoration: InputDecoration(
-                          prefixIcon: const Icon(Icons.lock),
-                          prefixIconColor: bleuClaire(),
-                          hintText: 'Enter your password',
-                          suffixIcon: IconButton(
-                            color: bleuClaire(),
-                            icon: Icon(isHidden
-                                ? Icons.visibility_off
-                                : Icons.visibility),
-                            onPressed: () {
-                              setState(() {
-                                isHidden = !isHidden;
-                              });
-                            },
-                          ),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      child: Container(
+                        padding: const EdgeInsets.all(5.0),
+                        child: TextFormField(
+                          maxLines: 1,
+                          controller: passwordController,
+                          onSaved: (onSavedval) {
+                            passwordController.text = onSavedval!;
+                          },
+                          obscureText: isHidden,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your password';
+                            }
+                            return null;
+                          },
+                          style: TextStyle(color: bleuClaire()),
+                          decoration: InputDecoration(
+                              prefixIcon: const Icon(Icons.lock),
+                              prefixIconColor: bleuClaire(),
+                              hintText: 'Enter your password',
+                              suffixIcon: IconButton(
+                                color: bleuClaire(),
+                                icon: Icon(isHidden
+                                    ? Icons.visibility_off
+                                    : Icons.visibility),
+                                onPressed: () {
+                                  setState(() {
+                                    isHidden = !isHidden;
+                                  });
+                                },
+                              ),
+                              border: const OutlineInputBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(70.0)))),
                         ),
                       ),
                     ),
@@ -188,32 +201,12 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(
                       height: 10,
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CustomText(
-                          "Not registered yet ?",
-                          color: noir(),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              SlideRightRoute(
-                                  child: const RegisterPage(),
-                                  page: const RegisterPage(),
-                                  direction: AxisDirection.left),
-                            );
-                          },
-                          child: CustomText(
-                            ' Create an account',
-                            color: bleuFonce(),
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
               ),
+            ),
+            const SizedBox(
+              height: 50,
             ),
           ],
         ),

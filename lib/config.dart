@@ -4,4 +4,5 @@ class Config {
   static const String loginAPI = "/test/login/";
   static const String registerAPI = "/test/register";
   static const String userProfileApi = "/test/userprofile/";
+  static const String getAPI = "https://jsonplaceholder.typicode.com/users";
 }

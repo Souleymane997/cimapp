@@ -1,11 +1,10 @@
-import 'package:cimapp/widgets/hompage.dart';
 import 'package:cimapp/widgets/launch.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() {
-  //WidgetsFlutterBinding.ensureInitialized();
-  //SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   runApp(const MyApp());
 }
 
@@ -18,7 +17,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(),
-      home: const Launch(),//  HomePage(), ,
+      home: const Launch(), //  HomePage(), ,
       debugShowCheckedModeBanner: false,
     );
   }

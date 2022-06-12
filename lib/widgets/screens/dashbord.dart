@@ -1,12 +1,15 @@
 import 'package:cimapp/models/colors.dart';
-import 'package:cimapp/widgets/screens/homeScreens/detailsmission.dart';
 import 'package:cimapp/widgets/screens/homeScreens/listemission.dart';
 import 'package:cimapp/widgets/screens/userScreens/user.dart';
 import 'package:flutter/material.dart';
 import 'package:expansion_tile_card/expansion_tile_card.dart';
-import '../../../models/custom_text.dart';
-import '../../../models/infos.dart';
-import '../../../models/slidepage.dart';
+import '../../models/custom_text.dart';
+import '../../models/infos.dart';
+import '../../models/slidepage.dart';
+import '../../modelsrequest/getresponse.dart';
+import '../../parser.dart';
+import 'homeScreens/detailsmission.dart';
+import 'missionScreens/consultermission.dart';
 
 class DashbordPage extends StatefulWidget {
   const DashbordPage({Key? key}) : super(key: key);
@@ -18,15 +21,16 @@ class DashbordPage extends StatefulWidget {
 class _DashbordPageState extends State<DashbordPage> {
   final GlobalKey cardA = GlobalKey();
   final GlobalKey cardB = GlobalKey();
-  late infoMission index;
 
-  List list = [
-    infoMission("PPPPPPPo", "DSA", 2, "Mr Soma"),
-    infoMission("AAAAA", "DSI", 2, "Mr Soma"),
-    infoMission("PPPPPPP", "DSA", 2, "Mr Dembele"),
-    infoMission("Resencement", "DSO", 5, "Mr Antoine"),
-    infoMission("PPPPPPP", "DSA", 2, "Mr Soma"),
-  ];
+  Parser parser = Parser();
+  List<getReponse> feed = [];
+  // ignore: prefer_typing_uninitialized_variables
+
+  @override
+  void initState() {
+    load();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -190,22 +194,42 @@ class _DashbordPageState extends State<DashbordPage> {
                       Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            cardButton("images/list.png", "Liste des Missions", const ListeMission(i:1,)),
-                            cardButton("images/task.png", "Mission Terminées", const ListeMission(i:2,)),
+                            cardButton(
+                                "images/list.png",
+                                "Liste des Missions",
+                                const ListeMission(
+                                  x: 1,
+                                ),
+                                context),
+                            cardButton("images/task.png", "Mission Terminées",
+                                const ListeMission(x: 2), context),
                           ]),
                       Container(height: 15.0),
                       Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             cardButton(
-                                "images/rotate.png", "Missions en Cours" , const ListeMission(i:3,)),
+                                "images/rotate.png",
+                                "Missions en Cours",
+                                const ListeMission(
+                                  x: 3,
+                                ),
+                                context),
                             cardButton(
-                                "images/termine.png", "Missions Validées", const ListeMission(i:4,)),
+                                "images/termine.png",
+                                "Missions Validées",
+                                const ListeMission(
+                                  x: 4,
+                                ),
+                                context),
                           ]),
                       Container(height: 10.0),
                     ],
                   )
                 ],
+              ),
+              Container(
+                height: 10.0,
               ),
               Container(
                 height: 10.0,
@@ -218,77 +242,64 @@ class _DashbordPageState extends State<DashbordPage> {
                 key: cardB,
                 elevation: 0.0,
                 title: CustomText(
-                  "CONSULTATION DE MISSION",
+                  "MES MISSIONS RECENTES ",
                   tex: 1.0,
                   textAlign: TextAlign.left,
                   color: bleuClaire(),
                 ),
                 children: <Widget>[
                   Container(
-                    height: 10.0,
+                    height: 3.0,
                   ),
-                  Column(
-                    children: [
-                      cardMission(list[0]),
-                      cardMission(list[1]),
-                      cardMission(list[2]),
-                    ],
-                  )
+                  loadFeedWidget(),
                 ],
-              ),
-              Container(
-                height: 10.0,
               ),
             ],
           )),
     );
   }
 
-  Widget cardButton(
-    String iconChemin,
-    String chaine,
-    Widget x
-  ) {
-    return Card(
-        margin: const EdgeInsets.only(left: 15.0, right: 15.0),
-        elevation: 0.0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-          side: BorderSide(color: grisee(), width: 1.0),
-        ),
-        child: InkWell(
-          onTap: () {
-            debugPrint("vous avez cliqué sur $chaine ");
-            Navigator.of(context).push(
-              SlideRightRoute(child: x, page: x, direction: AxisDirection.left),
-            );
-          },
-          child: Container(
-            width: MediaQuery.of(context).size.width / 2.5,
-            padding:
-                const EdgeInsets.only(left: 5, right: 5, bottom: 13, top: 13),
-            decoration: BoxDecoration(
-                color: blanc(), borderRadius: BorderRadius.circular(12)),
-            child: Row(
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: ImageIcon(
-                    AssetImage(iconChemin),
-                    size: 30,
-                    color: bleuClaire(),
-                  ),
-                ),
-                Flexible(
-                  child: Container(
-                    padding: const EdgeInsets.only(left: 5.0),
-                    child: CustomText(chaine, tex: 0.9, color: noir()),
-                  ),
-                ),
-              ],
+  load() async {
+    List<getReponse> result = await Parser().loadFeed();
+    setState(() {
+      feed = result;
+    });
+  }
+
+  Widget loadFeedWidget() {
+    if (feed.isNotEmpty) {
+      int long = feed.length;
+      
+      return Padding(
+        padding: const EdgeInsets.all(5.0),
+        child: Column(
+          children: [
+            cardWidget(context, feed[long - 1] , ConsulterMission(element:feed[long - 1] ) ),
+            const SizedBox(
+              height: 5.0,
             ),
-          ),
-        ));
+            cardWidget(context, feed[long - 2], ConsulterMission(element:feed[long - 2] )),
+            const SizedBox(
+              height: 5.0,
+            ),
+            cardWidget(context, feed[long - 3] , ConsulterMission(element:feed[long - 3] )),
+            const SizedBox(
+              height: 5.0,
+            ),
+            cardWidget(context, feed[long - 4] ,ConsulterMission(element:feed[long - 4] )),
+            const SizedBox(
+              height: 5.0,
+            ),
+            cardWidget(context, feed[long - 5], ConsulterMission(element:feed[long - 5] )),
+            const SizedBox(
+              height: 5.0,
+            ),
+          ],
+        ),
+      );
+    } else {
+      return const Center(child: CircularProgressIndicator());
+    }
   }
 
   Widget backGround() {
@@ -309,127 +320,6 @@ class _DashbordPageState extends State<DashbordPage> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget cardMission(infoMission element) {
-    return Column(
-      children: [
-        Container(
-          height: 10.0,
-        ),
-        InkWell(
-          onTap: () {
-            debugPrint("vous avez cliqué sur ${element.direction}");
-            Navigator.of(context).push(
-              SlideRightRoute(child: DetailsMission(name: element.direction.toString()), page: DetailsMission(name: element.direction.toString()), direction: AxisDirection.left),
-            );
-
-          },
-          child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-            Column(
-              children: [
-                Card(
-                  margin: const EdgeInsets.only(left: 15.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 5.0,
-                  child: Container(
-                      width: 60.0,
-                      height: 60.0,
-                      padding: const EdgeInsets.all(12),
-                      child: ImageIcon(
-                        const AssetImage("images/goal.png"),
-                        color: bleuClaire(),
-                      )),
-                ),
-              ],
-            ),
-            Container(
-              width: 20.0,
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.6,
-                  child: Row(
-                    children: [
-                      Flexible(
-                        child: CustomText(
-                          element.titre,
-                          tex: 1.0,
-                          color: noir(),
-                          textAlign: TextAlign.left,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(height: 8.0),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.6,
-                  child: Row(
-                    children: [
-                      Flexible(
-                        child: CustomText(
-                          "Direction : ${element.direction} ",
-                          tex: 0.7,
-                          color: gris(),
-                          textAlign: TextAlign.left,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.6,
-                  child: Row(
-                    children: [
-                      Flexible(
-                        child: CustomText(
-                          "Initiateur : ${element.initiateur}",
-                          tex: 0.7,
-                          color: gris(),
-                          textAlign: TextAlign.left,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.6,
-                  child: Row(
-                    children: [
-                      Flexible(
-                        child: CustomText(
-                          "Durée: ${element.duree} mois",
-                          tex: 0.7,
-                          color: gris(),
-                          textAlign: TextAlign.left,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            Container(
-              height: 10.0,
-            ),
-          ]),
-        ),
-        Container(
-          height: 10.0,
-        ),
-        const Divider(
-          thickness: 1.0,
-          height: 1.0,
-          endIndent: 10,
-          indent: 10,
-        ),
-      ],
     );
   }
 }

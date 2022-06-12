@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:cimapp/models/colors.dart';
 import 'package:flutter/material.dart';
 
+// ignore: use_key_in_widget_constructors
 class Background extends StatefulWidget {
   @override
   _MyPainterState createState() => _MyPainterState();
@@ -41,7 +42,6 @@ class Curved extends CustomPainter {
       colors: [
         bleuFonce(),
         bleuFonce(),
-       
       ],
     ).createShader(rect);
 
@@ -49,9 +49,9 @@ class Curved extends CustomPainter {
     paint2.shader = LinearGradient(
       begin: Alignment.centerLeft,
       end: Alignment.centerRight,
-      stops:const  [.05, 1],
+      stops: const [.05, 1],
       colors: [
-      bleuClaire(),
+        bleuClaire(),
         bleuClaire(),
       ],
     ).createShader(rect);
@@ -137,4 +137,14 @@ class CirclePainter extends CustomPainter {
   bool shouldRepaint(CustomPainter oldDelegate) {
     return true;
   }
+}
+
+Widget bgGround(BuildContext context) {
+  return Center(
+    child: Container(
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height,
+      color: bleuClaire().withOpacity(0.15),
+    ),
+  );
 }

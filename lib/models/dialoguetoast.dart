@@ -13,8 +13,8 @@ class DInfo {
     BuildContext context,
     String title,
     String content, {
-    String textNo = 'No',
-    String textYes = 'Yes',
+    String textNo = 'NON',
+    String textYes = 'OUI',
   }) async {
     return await showDialog(
       context: context,

@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 
 import '../../../models/colors.dart';
 import '../../../models/custom_text.dart';
+import '../../../models/infos.dart';
+import '../../../modelsrequest/getresponse.dart';
 
 class BudgetMission extends StatefulWidget {
-  const BudgetMission({ Key? key }) : super(key: key);
+  final getReponse element;
+  const BudgetMission({Key? key, required this.element}) : super(key: key);
 
   @override
   State<BudgetMission> createState() => _BudgetMissionState();
@@ -15,14 +19,30 @@ class _BudgetMissionState extends State<BudgetMission> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: CustomText("Budget Mission "),
-        
+        title: CustomText("Mission à Budgetiser ", tex: 1.2),
+        centerTitle: true,
       ),
-      body: Container(
-          width: 500,
-          height: 250,
-          color: Colors.red,
-          child: CustomText("hello", color: bleuClaire())),
+      body: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: Column(children: [
+          detailWidget(context, widget.element),
+        ]),
+      ),
+      floatingActionButton:
+          SpeedDial(icon: Icons.edit, backgroundColor: bleuClaire(), children: [
+        SpeedDialChild(
+          child: const Icon(Icons.close),
+          label: 'Rejeter',
+          backgroundColor: Colors.red,
+          onTap: () {/* Do something */},
+        ),
+        SpeedDialChild(
+          child: const Icon(Icons.check),
+          label: 'Budgetiser',
+          backgroundColor: Colors.greenAccent,
+          onTap: () {/* Do someting */},
+        ),
+      ]),
     );
   }
 }

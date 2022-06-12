@@ -1,7 +1,9 @@
 import 'package:cimapp/models/colors.dart';
 import 'package:flutter/material.dart';
-import 'screens/home.dart';
-import 'screens/mission.dart';
+import 'package:flutter/services.dart';
+import '../models/dialoguetoast.dart';
+import 'screens/dashbord.dart';
+import 'screens/menumission.dart';
 import 'screens/notifs.dart';
 import 'screens/plus.dart';
 
@@ -14,28 +16,69 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
-  late Widget _child;
+  bool exit = true;
+
+  final screens = [
+    const DashbordPage(),
+    const MenuMissionPage(),
+    const SettingsContent(),
+    const PlusPage(),
+  ];
 
   @override
   void initState() {
-    _child = const HomeContent();
+    _selectedIndex = 0;
     super.initState();
-  }
-
-   Future<bool> _onWillPop() async {
-    return false; //<-- SEE HERE
   }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: _onWillPop,
-      child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          home: Scaffold(
-            body: _child,
-            bottomNavigationBar: barNavigationBottom(),
-          )),
+      onWillPop: () async {
+        if (_selectedIndex == 0) {
+          showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) {
+                return AlertDialog(
+                  content: const Text("Quittez CIM "),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context, false);
+                        setState(() {
+                          exit = false;
+                        });
+                      },
+                      child: const Text("NON"),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context, true);
+                        SystemNavigator.pop();
+                        setState(() {
+                          exit = true;
+                        });
+                      },
+                      child: const Text("OUI"),
+                    ),
+                  ],
+                );
+              });
+          return exit;
+        } else {
+          setState(() {
+            _selectedIndex = 0;
+          });
+          return false;
+        }
+      },
+      child: SafeArea(
+        child: Scaffold(
+          body: IndexedStack(index: _selectedIndex, children: screens),
+          bottomNavigationBar: barNavigationBottom(),
+        ),
+      ),
     );
   }
 
@@ -43,6 +86,7 @@ class _HomePageState extends State<HomePage> {
     return BottomNavigationBar(
         currentIndex: _selectedIndex,
         type: BottomNavigationBarType.fixed,
+        enableFeedback: true,
         backgroundColor: blanc(),
         selectedItemColor: bleuClaire(),
         unselectedItemColor: gris(),
@@ -51,7 +95,6 @@ class _HomePageState extends State<HomePage> {
         showUnselectedLabels: false,
         onTap: (value) {
           setState(() {
-            _handleNavigationChange(value);
             _selectedIndex = value;
           });
         },
@@ -85,30 +128,5 @@ class _HomePageState extends State<HomePage> {
             label: 'Plus',
           ),
         ]);
-  }
-
-  void _handleNavigationChange(int index) {
-    setState(() {
-      switch (index) {
-        case 0:
-          _child = const HomeContent();
-          break;
-        case 1:
-          _child = const MissionContent();
-          break;
-        case 2:
-          _child = const SettingsContent();
-          break;
-        case 3:
-          _child = const UserContent();
-          break;
-      }
-      _child = AnimatedSwitcher(
-        switchInCurve: Curves.easeOut,
-        switchOutCurve: Curves.easeIn,
-        duration: const Duration(milliseconds: 200),
-        child: _child,
-      );
-    });
   }
 }
