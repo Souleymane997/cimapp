@@ -14,14 +14,18 @@ class _ParamLocalState extends State<ParamLocal> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: bleuFonce(),
       appBar: AppBar(
         title: CustomText("Parametres Local "),
       ),
-      body: Container(
-          width: 500,
-          height: 250,
-          color: Colors.red,
-          child: CustomText("hello", color: bleuClaire())),
+      body: SafeArea(
+        child: Center(
+          child: CustomText(
+            " Parametre ",
+            tex: TailleText(context).titre * 1.1,
+          ),
+        ),
+      ),
     );
   }
 }

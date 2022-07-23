@@ -1,4 +1,4 @@
-import 'dart:ui';
+
 import 'package:cimapp/models/colors.dart';
 import 'package:flutter/material.dart';
 
@@ -148,3 +148,10 @@ Widget bgGround(BuildContext context) {
     ),
   );
 }
+
+Widget backGroundblanc(BuildContext context) {
+    return Container(
+        color: Colors.white,
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height);
+  }

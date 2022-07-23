@@ -1,72 +1,73 @@
 // ignore: camel_case_types
+import 'dart:async';
+import 'dart:convert';
 
 import 'package:cimapp/modelsrequest/getresponse.dart';
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
+import '../parser.dart';
+import '../widgets/loginpage.dart';
 import 'colors.dart';
 import 'custom_text.dart';
 import 'slidepage.dart';
 
-// ignore: camel_case_types
-class infoNotif {
-  String titre = '';
-  String message = '';
-  String date = '';
-  late bool lu;
+notifFunction(int numMission, int codeAgent, String libelle) async {
+  bool result =
+      await Parser().postDataNotif(numMission,codeAgent,libelle);
 
-  infoNotif(this.titre, this.message, this.date, this.lu) {
-    titre = titre;
-    message = message;
-    date = date;
-    lu = lu;
+  if (result) {
+    //DInfo.toastNetral("effectuée");
+    debugPrint("effectuée");
+  } else {
+    debugPrint("erreur");
+    //DInfo.toastError(" Echec de l'approbation ");
   }
 }
 
-// ignore: camel_case_types
-class infoParticpant {
-  String nom = '';
-  String prenom = '';
-  String matricule = '';
-  String service = '';
-  String role = '';
+loadData(SharedPreferences saveDataUser) async {
+  saveDataUser = await SharedPreferences.getInstance();
+  String? repString = saveDataUser.getString('user');
 
-  infoParticpant(
-      this.nom, this.prenom, this.matricule, this.service, this.role) {
-    nom = nom;
-    prenom = prenom;
-    matricule = matricule;
-    service = service;
-    role = role;
+  if (repString!.isNotEmpty) {
+    Map<String, dynamic> map = jsonDecode(repString);
+    GetLoginReponse reponseLogin = GetLoginReponse.fromJson(map);
+
+    debugPrint(reponseLogin.nomPrenom);
   }
 }
 
-// ignore: camel_case_types
-class infoItineraire {
-  String localite = '';
-  int duree = 0;
-  late poSition statut;
+saveData(SharedPreferences saveDataUser, var R) async {
+  saveDataUser = await SharedPreferences.getInstance();
+  GetLoginReponse rep = GetLoginReponse();
+  Map<String, dynamic> data = json.decode(R.body);
+  rep = GetLoginReponse.fromJson(data);
 
-  infoItineraire(this.localite, this.duree, this.statut) {
-    localite = localite;
-    duree = duree;
-    statut = statut;
-  }
+  String repString = jsonEncode(rep); // la reponse du json en String
+  saveDataUser.setString('user', repString);
+  debugPrint(repString);
 }
 
-enum poSition { depart, escale, fin }
+clearData(SharedPreferences saveDataUser) async {
+  saveDataUser = await SharedPreferences.getInstance();
+  saveDataUser.clear();
+  debugPrint(" les données ont été effacées !!! ");
+}
 
-Widget cardWidget(BuildContext context, getReponse element, Widget x) {
+Widget cardWidget(BuildContext context, GetMissionUser element, Widget x) {
   return Card(
     child: Padding(
       padding:
           const EdgeInsets.only(left: 0.5, right: 0.5, top: 2.5, bottom: 2.5),
       child: InkWell(
+        splashColor: Colors.black87.withOpacity(0.5),
         onTap: () {
-          debugPrint("vous avez cliqué sur ${element.id}");
-          Navigator.of(context).push(
-            SlideRightRoute(child: x, page: x, direction: AxisDirection.left),
-          );
+          Timer(const Duration(milliseconds: 400), () {
+            debugPrint("vous avez cliqué sur ${element.numMission}");
+            Navigator.of(context).push(
+              SlideRightRoute(child: x, page: x, direction: AxisDirection.left),
+            );
+          });
         },
         child: ListTile(
           title: Row(
@@ -76,7 +77,7 @@ Widget cardWidget(BuildContext context, getReponse element, Widget x) {
                 width: MediaQuery.of(context).size.width * 0.12,
                 height: MediaQuery.of(context).size.width * 0.13,
                 decoration: BoxDecoration(
-                  color: blanc(),
+                  color: Colors.transparent,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
                     color: bleuClaire(),
@@ -104,8 +105,8 @@ Widget cardWidget(BuildContext context, getReponse element, Widget x) {
                             child: Align(
                               alignment: Alignment.centerLeft,
                               child: CustomText(
-                                '${element.name}',
-                                tex: 0.9,
+                                'N° 00${element.numMission} || ${element.libelleMotifMission}',
+                                tex: TailleText(context).soustitre,
                                 color: noir(),
                                 textAlign: TextAlign.left,
                                 fontWeight: FontWeight.w600,
@@ -116,11 +117,11 @@ Widget cardWidget(BuildContext context, getReponse element, Widget x) {
                       ),
                       const SizedBox(height: 10),
                       CustomText(
-                        '${element.email}',
-                        tex: 0.6,
+                        '-> ${element.descriptionMission} \n-> ${element.libelleStructure}',
+                        tex: TailleText(context).contenu,
                         color: noir(),
                         textAlign: TextAlign.left,
-                        fontWeight: FontWeight.w400,
+                        fontWeight: FontWeight.w300,
                       ),
                     ]),
               ),
@@ -137,10 +138,10 @@ Widget cardWidget(BuildContext context, getReponse element, Widget x) {
                     children: [
                       Flexible(
                         child: CustomText(
-                          '${element.phone}',
-                          tex: 0.5,
-                          color: gris(),
-                          fontWeight: FontWeight.w100,
+                          '${element.libelleEtat}',
+                          tex: TailleText(context).mini,
+                          color: bleuClaire(),
+                          fontWeight: FontWeight.w300,
                         ),
                       ),
                     ],
@@ -152,8 +153,8 @@ Widget cardWidget(BuildContext context, getReponse element, Widget x) {
                     children: [
                       Flexible(
                         child: CustomText(
-                          '${element.website}',
-                          tex: 0.5,
+                          '${element.libelleTypeMission} \n  Durée : ${element.dureeMission} jours',
+                          tex: TailleText(context).mini,
                           color: gris(),
                           fontWeight: FontWeight.w100,
                         ),
@@ -182,18 +183,23 @@ Widget cardButton(
         side: BorderSide(color: grisee(), width: 1.0),
       ),
       child: InkWell(
+        //highlightColor: Colors.black87.withOpacity(0.4),
+        splashColor: Colors.black87.withOpacity(0.5),
         onTap: () {
-          debugPrint("vous avez cliqué sur $chaine ");
-          Navigator.of(context).push(
-            SlideRightRoute(child: x, page: x, direction: AxisDirection.left),
-          );
+          Timer(const Duration(milliseconds: 400), () {
+            debugPrint("vous avez cliqué sur $chaine ");
+            Navigator.of(context).push(
+              SlideRightRoute(child: x, page: x, direction: AxisDirection.left),
+            );
+          });
         },
         child: Container(
-          width: MediaQuery.of(context).size.width / 2.5,
+          width: MediaQuery.of(context).size.width * 0.4125,
           padding:
               const EdgeInsets.only(left: 5, right: 5, bottom: 13, top: 13),
           decoration: BoxDecoration(
-              color: blanc(), borderRadius: BorderRadius.circular(12)),
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(12)),
           child: Row(
             children: [
               Align(
@@ -207,7 +213,8 @@ Widget cardButton(
               Flexible(
                 child: Container(
                   padding: const EdgeInsets.only(left: 5.0),
-                  child: CustomText(chaine, tex: 0.9, color: noir()),
+                  child: CustomText(chaine,
+                      tex: TailleText(context).soustitre, color: noir()),
                 ),
               ),
             ],
@@ -224,13 +231,17 @@ Widget cardOption(
         height: 13.0,
       ),
       InkWell(
+        splashColor: Colors.black87.withOpacity(0.5),
         onTap: () {
-          Navigator.of(context).push(
-            SlideRightRoute(child: x, page: x, direction: AxisDirection.left),
-          );
+          Timer(const Duration(milliseconds: 400), () {
+            Navigator.of(context).push(
+              SlideRightRoute(child: x, page: x, direction: AxisDirection.left),
+            );
+          });
         },
-        child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-          Column(
+        child:
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Row(
             children: [
               Card(
                 margin: const EdgeInsets.only(left: 15.0),
@@ -246,36 +257,37 @@ Widget cardOption(
                       size: 25.0,
                     )),
               ),
-            ],
-          ),
-          Container(
-            width: 20.0,
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
+              const SizedBox(
+                width: 5.0,
+              ),
               SizedBox(
-                width: MediaQuery.of(context).size.width * 0.75,
+                width: MediaQuery.of(context).size.width * 0.612,
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Flexible(
                       child: CustomText(
                         option,
-                        tex: 1.0,
+                        tex: TailleText(context).soustitre,
                         color: gris(),
                       ),
                     ),
-                    SizedBox(
-                        width: 25.0,
-                        height: 25.0,
-                        child: Icon(
-                          Icons.chevron_right,
-                          color: gris(),
-                        )),
                   ],
                 ),
               ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.1,
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Icon(
+                      Icons.chevron_right,
+                      color: gris(),
+                    ),
+                  )),
             ],
           ),
         ]),
@@ -304,7 +316,7 @@ Widget cardSimpleInfo(String chaine, String content, BuildContext context) {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Container(
-              width: MediaQuery.of(context).size.width * 0.8,
+              width: MediaQuery.of(context).size.width * 0.875,
               padding: const EdgeInsets.only(left: 10.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -312,7 +324,7 @@ Widget cardSimpleInfo(String chaine, String content, BuildContext context) {
                   Flexible(
                     child: CustomText(
                       chaine,
-                      tex: 0.8,
+                      tex: TailleText(context).contenu,
                       color: noir(),
                       textAlign: TextAlign.left,
                     ),
@@ -321,7 +333,9 @@ Widget cardSimpleInfo(String chaine, String content, BuildContext context) {
                     child: Align(
                       alignment: Alignment.centerRight,
                       child: CustomText(content,
-                          tex: 0.8, color: gris(), textAlign: TextAlign.right),
+                          tex: TailleText(context).contenu,
+                          color: gris(),
+                          textAlign: TextAlign.right),
                     ),
                   ),
                 ],
@@ -343,7 +357,7 @@ Widget cardSimpleInfo(String chaine, String content, BuildContext context) {
   );
 }
 
-Widget detailWidget(BuildContext context, getReponse element) {
+Widget detailWidget(BuildContext context, GetMissionUser element) {
   return Column(
     children: [
       Stack(children: [
@@ -357,13 +371,34 @@ Widget detailWidget(BuildContext context, getReponse element) {
                 children: [
                   Flexible(
                       child: Center(
-                    child: Container(
-                        padding: const EdgeInsets.all(10.0),
-                        child: CustomText(
-                          '${element.email}',
-                          textAlign: TextAlign.center,
-                          tex: 1.4,
-                        )),
+                    child: Column(
+                      children: [
+                        Container(
+                          height: 8,
+                        ),
+                        Container(
+                            padding: const EdgeInsets.all(10.0),
+                            child: CustomText(
+                              'Mission N° 2022/00${element.numMission}',
+                              textAlign: TextAlign.center,
+                              tex: TailleText(context).titre,
+                            )),
+                        Container(
+                          height: 5,
+                        ),
+                        Card(
+                          elevation: 5.0,
+                          color: Colors.orangeAccent,
+                          child: Container(
+                              padding: const EdgeInsets.all(3.0),
+                              child: CustomText(
+                                'Statut : ${element.libelleEtat}',
+                                textAlign: TextAlign.center,
+                                tex: TailleText(context).soustitre,
+                              )),
+                        ),
+                      ],
+                    ),
                   )),
                 ],
               ),
@@ -392,8 +427,8 @@ Widget detailWidget(BuildContext context, getReponse element) {
                     height: 8.0,
                   ),
                   CustomText(
-                    "Type de mission        :   Mission a l'exterieur",
-                    tex: 0.8,
+                    "Type de mission        :   ${element.libelleTypeMission}",
+                    tex: TailleText(context).contenu,
                     color: gris(),
                   ),
                   Container(
@@ -409,8 +444,8 @@ Widget detailWidget(BuildContext context, getReponse element) {
                     height: 8.0,
                   ),
                   CustomText(
-                    "Objet de la mission   :   Formation ",
-                    tex: 0.8,
+                    "Objet de la mission   :   ${element.objetMission}",
+                    tex: TailleText(context).contenu,
                     color: gris(),
                   ),
                   Container(
@@ -426,8 +461,8 @@ Widget detailWidget(BuildContext context, getReponse element) {
                     height: 8.0,
                   ),
                   CustomText(
-                    "Motif de mission        :   Colloque",
-                    tex: 0.8,
+                    "Motif de mission       :   ${element.libelleMotifMission}",
+                    tex: TailleText(context).contenu,
                     color: gris(),
                   ),
                   Container(
@@ -443,8 +478,8 @@ Widget detailWidget(BuildContext context, getReponse element) {
                     height: 8.0,
                   ),
                   CustomText(
-                    "Description                 :   ppppp ",
-                    tex: 0.8,
+                    "Description                :   ${element.descriptionMission} ",
+                    tex: TailleText(context).contenu,
                     color: gris(),
                   ),
                   Container(
@@ -467,7 +502,7 @@ Widget detailWidget(BuildContext context, getReponse element) {
                 alignment: Alignment.centerLeft,
                 child: CustomText(
                   "Informations générales",
-                  tex: 1.0,
+                  tex: TailleText(context).soustitre,
                   color: bleuClaire(),
                   textAlign: TextAlign.left,
                   fontWeight: FontWeight.bold,
@@ -486,7 +521,7 @@ Widget detailWidget(BuildContext context, getReponse element) {
                 elevation: 3.0,
                 title: CustomText(
                   "Informations",
-                  tex: 1.0,
+                  tex: TailleText(context).soustitre,
                   textAlign: TextAlign.left,
                   color: bleuClaire(),
                 ),
@@ -496,14 +531,15 @@ Widget detailWidget(BuildContext context, getReponse element) {
                   ),
                   Column(
                     children: [
-                      cardSimpleInfo(
-                          "Svce. demandeur",
-                          "Cabinet/Secrétariat Général/Direction Générale de l'Artisanat",
-                          context),
-                      cardSimpleInfo("Type ordre mission", "Groupé", context),
+                      cardSimpleInfo("Svce. demandeur",
+                          element.libelleStructure.toString(), context),
+                      cardSimpleInfo("Type ordre mission",
+                          "${element.libelleType}", context),
                       cardSimpleInfo("Exercice budgetaire", "2022", context),
-                      cardSimpleInfo("Initiateur",
-                          "BADOLO Boubié Séraphin - 111308 W", context),
+                      cardSimpleInfo(
+                          "Initiateur",
+                          "${element.nomPrenom} - ${element.matricule}",
+                          context),
                     ],
                   )
                 ],
@@ -527,7 +563,7 @@ Widget detailWidget(BuildContext context, getReponse element) {
                           children: [
                             CustomText(
                               "Periode ",
-                              tex: 1.1,
+                              tex: TailleText(context).soustitre,
                               color: bleuClaire(),
                             ),
                           ],
@@ -550,24 +586,24 @@ Widget detailWidget(BuildContext context, getReponse element) {
                               height: 8.0,
                             ),
                             CustomText(
-                              "Date début : 11/04/2022",
-                              tex: 0.8,
+                              "Date début : ${element.dateDepartPrevue}",
+                              tex: TailleText(context).contenu,
                               color: gris(),
                             ),
                             Container(
                               height: 8.0,
                             ),
                             CustomText(
-                              "Date fin : 18/04/2022",
-                              tex: 0.8,
+                              "Date fin       : ${element.dateRetourPrevue}",
+                              tex: TailleText(context).contenu,
                               color: gris(),
                             ),
                             Container(
                               height: 8.0,
                             ),
                             CustomText(
-                              "Date début : 11/04/2022",
-                              tex: 0.8,
+                              "Durée          : ${element.dureeMission} (en Jours)",
+                              tex: TailleText(context).contenu,
                               color: gris(),
                             ),
                             Container(
@@ -586,9 +622,453 @@ Widget detailWidget(BuildContext context, getReponse element) {
         ),
       ),
       Container(
-              height: 70.0,
-            ),
+        height: 70.0,
+      ),
     ],
-    
   );
+}
+
+Widget cardProfil(String option, IconData icon, BuildContext context,
+    GetLoginReponse? reponseLogin) {
+  return Column(
+    children: [
+      Container(
+        height: 13.0,
+      ),
+      InkWell(
+        splashColor: Colors.black87.withOpacity(0.5),
+        onTap: () {
+          Timer(const Duration(milliseconds: 10), () async {
+            return await showDialog(
+              context: context,
+              barrierDismissible: true,
+              builder: (context) {
+                TextEditingController nomPrenom = TextEditingController();
+                TextEditingController matricule = TextEditingController();
+                TextEditingController genre = TextEditingController();
+
+                nomPrenom.text = (reponseLogin!.nomPrenom ?? " nom prenom ");
+                matricule.text = (reponseLogin.matricule ?? " 0000X");
+                genre.text = (reponseLogin.genre ?? " M ");
+
+                return SimpleDialog(
+                  shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(15.0))),
+                  contentPadding: const EdgeInsets.only(top: 10.0),
+                  backgroundColor: blanc(),
+                  title: CustomText(
+                    "Mes Informations",
+                    color: bleuClaire(),
+                    tex: TailleText(context).titre,
+                    textAlign: TextAlign.left,
+                  ),
+                  children: [
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.35,
+                      width: MediaQuery.of(context).size.width * 0.6,
+                      child: Column(
+                        children: [
+                          Divider(
+                            thickness: 1.0,
+                            height: 2.0,
+                            color: grisee(),
+                          ),
+                          const SizedBox(
+                            height: 10.0,
+                          ),
+                          Column(
+                            children: [
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.6,
+                                child: TextField(
+                                  enabled: false,
+                                  controller: nomPrenom,
+                                  decoration: const InputDecoration(
+                                      labelText: "nomPrenom",
+                                      prefixIcon: Icon(Icons.person)),
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 5,
+                              ),
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.6,
+                                child: TextField(
+                                  enabled: false,
+                                  controller: matricule,
+                                  decoration: const InputDecoration(
+                                      labelText: "Matricule",
+                                      prefixIcon: Icon(Icons.numbers_sharp)),
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 5,
+                              ),
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.6,
+                                child: TextField(
+                                  enabled: false,
+                                  controller: genre,
+                                  decoration: InputDecoration(
+                                      labelText: "Genre",
+                                      prefixIcon: Icon((genre.text == "M")
+                                          ? Icons.male
+                                          : Icons.female)),
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    Center(
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.15,
+                        child: ElevatedButton(
+                            child: CustomText("retour",
+                                color: blanc(),
+                                tex: TailleText(context).contenu),
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 7.0, vertical: 1.0),
+                              primary: bleuClaire(),
+                              onPrimary: bleuClaire(),
+                              shadowColor: bleuFonce(),
+                              elevation: 3.0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(3.0),
+                              ),
+                            ),
+                            onPressed: () {
+                              Navigator.pop(context);
+                            }),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                );
+              },
+            );
+          });
+        },
+        child:
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Row(
+            children: [
+              Card(
+                margin: const EdgeInsets.only(left: 15.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: SizedBox(
+                    width: 40.0,
+                    height: 40.0,
+                    child: Icon(
+                      icon,
+                      color: gris(),
+                      size: 25.0,
+                    )),
+              ),
+              const SizedBox(
+                width: 5.0,
+              ),
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.612,
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: CustomText(
+                        option,
+                        tex: TailleText(context).soustitre,
+                        color: gris(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.1,
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Icon(
+                      Icons.chevron_right,
+                      color: gris(),
+                    ),
+                  )),
+            ],
+          ),
+        ]),
+      ),
+      Container(
+        height: 13.0,
+      ),
+      const Divider(
+        thickness: 1.0,
+        height: 1.0,
+        endIndent: 10,
+        indent: 10,
+      ),
+    ],
+  );
+}
+
+Widget cardLogout(String option, IconData icon, BuildContext context,
+    SharedPreferences? loginData) {
+  return Column(
+    children: [
+      Container(
+        height: 13.0,
+      ),
+      InkWell(
+        onTap: () async {
+          return await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) {
+              return AlertDialog(
+                shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(15.0))),
+                contentPadding: const EdgeInsets.only(top: 10.0),
+                title: CustomText(
+                  "Se déconnecter",
+                  color: bleuClaire(),
+                  tex: TailleText(context).titre,
+                  textAlign: TextAlign.left,
+                ),
+                content: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Divider(
+                      thickness: 1.0,
+                      height: 2.0,
+                      color: grisee(),
+                    ),
+                    const SizedBox(
+                      height: 10.0,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(5.0, 5.0, 5.0, 10.0),
+                      child: Row(
+                        children: [
+                          Flexible(
+                            child: CustomText(
+                              "Etes-vous sûr de vouloir vous déconnecter?",
+                              color: noir(),
+                              tex: TailleText(context).soustitre,
+                              textAlign: TextAlign.left,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                actions: [
+                  ElevatedButton(
+                      child: CustomText("NON",
+                          color: bleuClaire(),
+                          tex: TailleText(context).contenu),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 5.0, vertical: 1.0),
+                        primary: Colors.white,
+                        onPrimary: Colors.white,
+                        shadowColor: bleuFonce(),
+                        elevation: 3.0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(3.0),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        //login();
+                      }),
+                  const SizedBox(width: 7.5),
+                  ElevatedButton(
+                      child: CustomText("OUI",
+                          color: blanc(), tex: TailleText(context).contenu),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 5.0, vertical: 1.0),
+                        primary: bleuClaire(),
+                        onPrimary: bleuClaire(),
+                        shadowColor: bleuFonce(),
+                        elevation: 3.0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(3.0),
+                        ),
+                      ),
+                      onPressed: () {
+                        loginData!.setBool('login', true);
+                        Navigator.of(context).push(
+                          SlideRightRoute(
+                              child: const LoginPage(),
+                              page: const LoginPage(),
+                              direction: AxisDirection.right),
+                        );
+                      }),
+                  const SizedBox(width: 2.5),
+                ],
+              );
+            },
+          );
+        },
+        child:
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Row(
+            children: [
+              Card(
+                margin: const EdgeInsets.only(left: 15.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: SizedBox(
+                    width: 40.0,
+                    height: 40.0,
+                    child: Icon(
+                      icon,
+                      color: gris(),
+                      size: 25.0,
+                    )),
+              ),
+              const SizedBox(
+                width: 5.0,
+              ),
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.612,
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: CustomText(
+                        option,
+                        tex: TailleText(context).soustitre,
+                        color: gris(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.1,
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Icon(
+                      Icons.chevron_right,
+                      color: gris(),
+                    ),
+                  )),
+            ],
+          ),
+        ]),
+      ),
+      Container(
+        height: 13.0,
+      ),
+      const Divider(
+        thickness: 1.0,
+        height: 1.0,
+        endIndent: 10,
+        indent: 10,
+      ),
+    ],
+  );
+}
+
+class NewWidget extends StatefulWidget {
+  const NewWidget({
+    Key? key,
+
+    // this.selecteItems,
+  }) : super(key: key);
+
+  // ignore: unused_field
+
+  // List<String>? selecteItems;
+  // List<String>? get selectedItems => selecteItems;
+  @override
+  State<NewWidget> createState() => _NewWidgetState();
+}
+
+class _NewWidgetState extends State<NewWidget> {
+  bool _objetIsSelected = false;
+  bool _montantIsSelected = false;
+  bool _dateIsSelected = false;
+
+  List<String>? selecteItems;
+  List<String>? get selectedItems => selecteItems;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(25))),
+      alignment: Alignment.topCenter,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Wrap(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
+                child: ChoiceChip(
+                  label: const Text('Objet'),
+                  selected: _objetIsSelected,
+                  selectedColor: Colors.amber,
+                  onSelected: (newboolvalue) {
+                    setState(() {
+                      _objetIsSelected = newboolvalue;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
+                child: ChoiceChip(
+                  selectedColor: Colors.amber,
+                  label: const Text('Montant'),
+                  selected: _montantIsSelected,
+                  onSelected: (newboolvalue) {
+                    setState(() {
+                      _montantIsSelected = newboolvalue;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
+                child: ChoiceChip(
+                  label: const Text('Date'),
+                  selectedColor: Colors.amber,
+                  selected: _dateIsSelected,
+                  onSelected: (newboolvalue) {
+                    setState(() {
+                      _dateIsSelected = newboolvalue;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }

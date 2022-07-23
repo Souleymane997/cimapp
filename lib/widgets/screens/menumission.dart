@@ -1,7 +1,6 @@
 import 'package:cimapp/widgets/screens/missionScreens/listing.dart';
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart' as _getx;
 import '../../models/colors.dart';
 import '../../models/custom_text.dart';
 import '../../models/infos.dart';
@@ -25,7 +24,7 @@ class _MenuMissionPageState extends State<MenuMissionPage> {
           backgroundColor: bleuFonce(),
           title: CustomText(
             "Missions ",
-            tex: 1.2,
+            tex: TailleText(context).titre,
             fontWeight: FontWeight.normal,
           ),
           actions: [
@@ -67,13 +66,13 @@ class _MenuMissionPageState extends State<MenuMissionPage> {
                 leading: ImageIcon(
                   const AssetImage("images/goal.png"),
                   color: bleuClaire(),
-                  size: 20.0,
+                  size: TailleText(context).titre * 19,
                 ),
                 borderRadius: const BorderRadius.all(Radius.circular(0.0)),
                 elevation: 0.0,
                 title: CustomText(
                   "Workflow des missions",
-                  tex: 0.8,
+                  tex: TailleText(context).soustitre,
                   textAlign: TextAlign.left,
                   color: bleuClaire(),
                 ),
@@ -83,24 +82,22 @@ class _MenuMissionPageState extends State<MenuMissionPage> {
                       Container(
                         height: 5.0,
                       ),
-                      //cardMission("Initier une mission", Icons.edit,
-                      //const InitierMissionPage()),
                       cardOption("Mission à approuver", Icons.touch_app,
-                          const ListingMission(x: 1), context),
-                      cardOption("Mission à budgétiser", Icons.local_atm,
                           const ListingMission(x: 2), context),
-                      cardOption("Mission à valider", Icons.check,
+                      cardOption("Mission à budgétiser", Icons.local_atm,
                           const ListingMission(x: 3), context),
                       cardOption("Mission à payer", Icons.attach_money,
                           const ListingMission(x: 4), context),
                       cardOption("Mission à vérifier", Icons.verified,
                           const ListingMission(x: 5), context),
-                      cardOption("Mission à clôturer", Icons.close,
+                      cardOption("Mission à valider", Icons.check,
                           const ListingMission(x: 6), context),
+                      cardOption("Mission à clôturer", Icons.close,
+                          const ListingMission(x: 7), context),
                       cardOption(
                           "Consultation d'une mission",
                           Icons.remove_red_eye,
-                          const ListingMission(x: 7),
+                          const ListingMission(x: 8),
                           context),
                     ],
                   )

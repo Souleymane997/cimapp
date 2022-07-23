@@ -1,18 +1,17 @@
 import 'dart:async';
 import 'package:cimapp/models/colors.dart';
-import 'package:cimapp/models/textfield.dart';
-import 'package:cimapp/modelsrequest/loginresponse.dart';
 import 'package:cimapp/widgets/hompage.dart';
 import 'package:flutter/material.dart';
-import 'package:email_validator/email_validator.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../config.dart';
 import '../models/bg.dart';
 import '../models/custom_text.dart';
+import '../models/infos.dart';
 import '../models/slidepage.dart';
 import 'package:http/http.dart' as http;
 import '../models/dialoguetoast.dart';
-import 'package:get/get.dart';
+
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -23,15 +22,44 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  late SharedPreferences? saveDataUser ;
+  late SharedPreferences loginData;
+
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  late bool newUser;
+
+  // ignore: non_constant_identifier_names, prefer_typing_uninitialized_variables
+  late var Response;
+
   bool isHidden = true;
   bool isInAsynCall = false;
 
   @override
   void initState() {
     isInAsynCall = false;
+    checkLogin();
     super.initState();
+  }
+
+  void checkLogin() async {
+    saveDataUser = await SharedPreferences.getInstance();
+    loginData = await SharedPreferences.getInstance();
+    newUser = (loginData.getBool('login') ?? true);
+
+    if (newUser == false) {
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => const HomePage()));
+    }
+  }
+
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed.
+    emailController.dispose();
+    passwordController.dispose();
+    clearData(saveDataUser!) ;
+    super.dispose();
   }
 
   @override
@@ -86,7 +114,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 CustomText(
                   "CIM",
-                  tex: 1.5,
+                  tex: TailleText(context).titre + 0.3,
                   color: bleuClaire(),
                   family: "Captain",
                 ),
@@ -96,7 +124,7 @@ class _LoginPageState extends State<LoginPage> {
               padding: const EdgeInsets.only(bottom: 10, top: 20),
               child: CustomText(
                 'Se Connecter ',
-                tex: 2.3,
+                tex: TailleText(context).titre * 1.8,
                 color: bleuClaire(),
                 family: "Captain",
               ),
@@ -114,16 +142,19 @@ class _LoginPageState extends State<LoginPage> {
                         child: TextFormField(
                           onChanged: (value) {},
                           controller: emailController,
-                          validator: (value) => EmailValidator.validate(value!)
-                              ? null
-                              : "Please enter a valid email",
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'entrer votre identifiant SVP !!';
+                            }
+                            return null;
+                          },
                           maxLines: 1,
                           onSaved: (onSavedval) {
                             emailController.text = onSavedval!;
                           },
                           style: TextStyle(color: bleuClaire()),
                           decoration: const InputDecoration(
-                              hintText: "Enter your email",
+                              hintText: "identifiant",
                               prefixIcon: Icon(Icons.email),
                               border: OutlineInputBorder(
                                   borderRadius:
@@ -147,7 +178,7 @@ class _LoginPageState extends State<LoginPage> {
                           obscureText: isHidden,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter your password';
+                              return 'entrer votre mot de passe SVP !!';
                             }
                             return null;
                           },
@@ -155,7 +186,7 @@ class _LoginPageState extends State<LoginPage> {
                           decoration: InputDecoration(
                               prefixIcon: const Icon(Icons.lock),
                               prefixIconColor: bleuClaire(),
-                              hintText: 'Enter your password',
+                              hintText: 'mot de passe',
                               suffixIcon: IconButton(
                                 color: bleuClaire(),
                                 icon: Icon(isHidden
@@ -177,7 +208,9 @@ class _LoginPageState extends State<LoginPage> {
                       height: 10,
                     ),
                     ElevatedButton(
-                        child: CustomText("Login", color: blanc(), tex: 1.5),
+                        child: CustomText("Login",
+                            color: blanc(),
+                            tex: TailleText(context).titre + 0.3),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 40.0, vertical: 15.0),
@@ -190,13 +223,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                         onPressed: () {
-                          Navigator.of(context).push(
-                            SlideRightRoute(
-                                child: const HomePage(),
-                                page: const HomePage(),
-                                direction: AxisDirection.left),
-                          );
-                          //login();
+                          login();
                         }),
                     const SizedBox(
                       height: 10,
@@ -227,7 +254,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  //* verifie l'email et le mot de passe dans la base de donnée
+  //* verifie l'identifiant et le mot de passe dans la base de donnée
   login() async {
     if (validateAndSave()) {
       setState(() {
@@ -236,17 +263,24 @@ class _LoginPageState extends State<LoginPage> {
 
       var client = http.Client();
       var url = Uri.parse(Config.apiURL +
-          Config.loginAPI +
+          Config.apiLogin +
           emailController.text +
           "/" +
           passwordController.text);
+
       var response = await client.get(url);
+      Response = response;
 
       if (response.body.isNotEmpty) {
+
+        saveData(saveDataUser!,Response);
+
         DInfo.toastSuccess("Connecté avec success");
+
 
         setState(() {
           isInAsynCall = false;
+          loginData.setBool('login',false) ;
         });
 
         Timer(
@@ -263,27 +297,16 @@ class _LoginPageState extends State<LoginPage> {
         setState(() {
           isInAsynCall = false;
         });
-        DInfo.toastError(" Invalid email or password ");
+        DInfo.toastError(" identifiant ou mot de passe invalide ");
       }
     } else {
       if (emailController.text.isNotEmpty &&
           passwordController.text.isNotEmpty) {
-        DInfo.toastError("Invalid email or password ");
+        DInfo.toastError(" identifiant ou mot de passe invalide ");
       } else {
         DInfo.toastError(" Remplissez les champs SVP ");
       }
     }
   }
-
-  a() {
-    Navigator.of(context).pushReplacement(
-      SlideRightRoute(
-          child: const HomePage(),
-          page: const HomePage(),
-          direction: AxisDirection.left),
-    );
-  }
-
-  //DInfo.closeDialog(1000,durationBeforeClose: const Duration(seconds: 1) , actionAfterClose : a );
 
 }

@@ -1,7 +1,12 @@
+import 'dart:async';
+
+import 'package:cimapp/models/slidepage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart' as _toast;
 import 'package:get/get.dart' as _getx;
 
+import '../widgets/screens/missionScreens/listing.dart';
 import 'colors.dart';
 import 'custom_text.dart';
 
@@ -79,75 +84,6 @@ class DInfo {
     );
   }
 
-  /// dialog for response success
-  /// not automatically closed, so you have to use DInfo.close() after this
-  static void dialogSuccess(BuildContext context, String message) {
-    _getx.Get.dialog(
-      SimpleDialog(
-        children: [
-          Center(
-            child: Icon(
-              Icons.check_circle_outline_outlined,
-              color: Colors.green[700],
-              size: 40,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: CustomText(
-              ' ok ',
-              color: bleuClaire(),
-            ),
-          ),
-        ],
-      ),
-      barrierDismissible: false,
-    );
-  }
-
-  /// dialog for response custom icon
-  /// not automatically closed, so you have to use DInfo.close() after this
-  static void dialogNetral(String message, {IconData? icon}) {
-    _getx.Get.dialog(
-      SimpleDialog(
-        children: [
-          if (icon != null)
-            Center(
-              child: Icon(
-                icon,
-                color: Colors.blue[700],
-                size: 40,
-              ),
-            ),
-          if (icon != null) const SizedBox(height: 16),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-      barrierDismissible: false,
-    );
-  }
-
-  /// close dialog and callback
-  static void closeDialog(int i,
-      {Duration? durationBeforeClose, Function? actionAfterClose}) {
-    durationBeforeClose = Duration(milliseconds: i);
-    Future.delayed(
-      durationBeforeClose,
-      () {
-        _getx.Get.back();
-        if (actionAfterClose != null) actionAfterClose.call();
-      },
-    );
-  }
-
   /// fast response for error with automatically close
   static void toastError(String message, {bool isLong = false}) {
     _toast.Fluttertoast.showToast(
@@ -194,105 +130,113 @@ class DInfo {
   static void closeToast() {
     _toast.Fluttertoast.cancel();
   }
+}
 
-  /// response below of ui for error with automatically close
-  static void snackBarError(String message) {
-    _getx.Get.rawSnackbar(
-      messageText: Text(
-        message,
-        style: TextStyle(color: Colors.red[900]),
-      ),
-      snackStyle: _getx.SnackStyle.FLOATING,
-      backgroundColor: Colors.red[100]!,
-    );
-  }
+confirmeDialogue(BuildContext context, String message, int x, Function a) {
+  showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(15.0))),
+          contentPadding: const EdgeInsets.only(top: 10.0),
+          content: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.fromLTRB(10.0, 5.0, 5.0, 10.0),
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: CustomText(
+                          message,
+                          tex: TailleText(context).soustitre,
+                          color: noir(),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ]),
+          actions: [
+            ElevatedButton(
+                child: CustomText(
+                  "NON",
+                  color: bleuClaire(),
+                  tex: TailleText(context).contenu,
+                ),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 5.0, vertical: 1.0),
+                  primary: Colors.white,
+                  onPrimary: Colors.white,
+                  shadowColor: bleuFonce(),
+                  elevation: 3.0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(3.0),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                }),
+            const SizedBox(width: 7.5),
+            ElevatedButton(
+                child: CustomText(
+                  "OUI",
+                  color: blanc(),
+                  tex: TailleText(context).contenu,
+                ),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 5.0, vertical: 1.0),
+                  primary: bleuClaire(),
+                  onPrimary: bleuClaire(),
+                  shadowColor: bleuFonce(),
+                  elevation: 3.0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(3.0),
+                  ),
+                ),
+                onPressed: () {
+                  a();
+                  Navigator.pop(context);
 
-  /// response below of ui for success with automatically close
-  static void snackBarSuccess(String message) {
-    _getx.Get.rawSnackbar(
-      messageText: Text(
-        message,
-        style: TextStyle(color: Colors.green[900]),
-      ),
-      snackStyle: _getx.SnackStyle.FLOATING,
-      backgroundColor: Colors.green[100]!,
-    );
-  }
+                  Navigator.of(context).pop(
+                    SlideRightRoute(
+                        child: ListingMission(x: x),
+                        page: ListingMission(x: x),
+                        direction: AxisDirection.left),
+                  );
+                }),
+            const SizedBox(width: 2.5),
+          ],
+        );
+      });
+}
 
-  /// response below of ui for netral with automatically close
-  static void snackBarNetral(String message) {
-    _getx.Get.rawSnackbar(
-      messageText: Text(
-        message,
-        style: TextStyle(color: Colors.blue[900]),
-      ),
-      snackStyle: _getx.SnackStyle.FLOATING,
-      backgroundColor: Colors.blue[100]!,
-    );
-  }
+initNotify(FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin) {
+  var initializationSettingsAndroid =
+      const AndroidInitializationSettings('uc_launcher');
+  var initializationSettingsIOs = const IOSInitializationSettings();
+  var initSetttings = InitializationSettings(
+      android: initializationSettingsAndroid, iOS: initializationSettingsIOs);
 
-  /// you can use this to close current snackbar or notif
-  static void closeSnackBarOrNotif() {
-    _getx.Get.closeAllSnackbars();
-  }
+  flutterLocalNotificationsPlugin.initialize(initSetttings);
+}
 
-  /// response like notif for error
-  /// automatically close
-  static void notifError(
-    String title,
-    String message, {
-    double radius = 12,
-    bool showBorder = false,
-  }) {
-    _getx.Get.snackbar(
-      title,
-      message,
-      backgroundColor: Colors.red[100],
-      colorText: Colors.red[900],
-      borderColor: showBorder ? Colors.red[900] : Colors.transparent,
-      borderRadius: radius,
-      borderWidth: showBorder ? 1 : 0,
-      isDismissible: false,
-    );
-  }
-
-  /// response like notif for success
-  /// automatically close
-  static void notifSuccess(
-    String title,
-    String message, {
-    double radius = 12,
-    bool showBorder = false,
-  }) {
-    _getx.Get.snackbar(
-      title,
-      message,
-      backgroundColor: Colors.green[100],
-      colorText: Colors.green[900],
-      borderColor: showBorder ? Colors.green[900] : Colors.transparent,
-      borderRadius: radius,
-      borderWidth: showBorder ? 1 : 0,
-      isDismissible: false,
-    );
-  }
-
-  /// response like notif for netral
-  /// automatically close
-  static void notifNetral(
-    String title,
-    String message, {
-    double radius = 12,
-    bool showBorder = false,
-  }) {
-    _getx.Get.snackbar(
-      title,
-      message,
-      backgroundColor: Colors.blue[100],
-      colorText: Colors.blue[900],
-      borderColor: showBorder ? Colors.blue[900] : Colors.transparent,
-      borderRadius: radius,
-      borderWidth: showBorder ? 1 : 0,
-      isDismissible: false,
-    );
-  }
+showNotification(
+    FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin) async {
+  var android = const AndroidNotificationDetails('id', 'channel ',
+      channelDescription: 'description',
+      priority: Priority.high,
+      importance: Importance.max);
+  var iOS = const IOSNotificationDetails();
+  var platform = NotificationDetails(android: android, iOS: iOS);
+  await flutterLocalNotificationsPlugin.show(0, " CIMAPP Notifications ",
+      "Une nouvelle mission vient d'être approuvé ", platform,
+      payload: "Une nouvelle mission vient d'etre approuvé ");
 }

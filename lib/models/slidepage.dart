@@ -6,7 +6,7 @@ class SlideRightRoute extends PageRouteBuilder {
 
   SlideRightRoute({required this.page, child, required this.direction})
       : super(
-          transitionDuration: const Duration(milliseconds: 250),
+          transitionDuration: const Duration(milliseconds: 400),
           pageBuilder: (
             BuildContext context,
             Animation<double> animation,

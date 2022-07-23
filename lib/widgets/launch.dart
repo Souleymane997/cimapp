@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:cimapp/widgets/hompage.dart';
 import 'package:cimapp/widgets/loginpage.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/colors.dart';
 import '../models/custom_text.dart';
@@ -15,26 +17,44 @@ class Launch extends StatefulWidget {
 }
 
 class _LaunchState extends State<Launch> {
+  late SharedPreferences loginData;
+  late bool newUser;
+
   //* fonction Timer
   startTimer() async {
     Duration duration = const Duration(seconds: 5);
-    return Timer(duration, navigatePage);
+    return Timer(duration, navigatePage );
   }
 
 //* fonction pour changer de page
   void navigatePage() {
-    Navigator.of(context).push(
-      SlideRightRoute(
-          child: const LoginPage(),
-          page: const LoginPage(),
-          direction: AxisDirection.left),
-    );
+    if (newUser) {
+      Navigator.of(context).push(
+        SlideRightRoute(
+            child: const LoginPage(),
+            page: const LoginPage(),
+            direction: AxisDirection.left),
+      );
+    } else {
+      Navigator.of(context).push(
+        SlideRightRoute(
+            child: const HomePage(),
+            page: const HomePage(),
+            direction: AxisDirection.left),
+      );
+    }
   }
 
   @override
   void initState() {
+    checkLogin();
     startTimer();
     super.initState();
+  }
+
+  void checkLogin() async {
+    loginData = await SharedPreferences.getInstance();
+    newUser = (loginData.getBool('login') ?? true);
   }
 
   @override
@@ -55,8 +75,8 @@ class _LaunchState extends State<Launch> {
                   ),
                   elevation: 20.0,
                   child: SizedBox(
-                      width: 130.0,
-                      height: 160.0,
+                      width: TailleText(context).titre * 104 ,
+                      height: TailleText(context).titre * 128,
                       child: Image.asset(
                         "images/logo.png",
                         fit: BoxFit.fill,
@@ -65,13 +85,13 @@ class _LaunchState extends State<Launch> {
                 Container(height: 13.0),
                 CustomText(
                   "CIM",
-                  tex: 3.0,
+                  tex: TailleText(context).titre * 2.4,
                   family: "Captain",
                 ),
                 Container(height: 6.0),
                 CustomText(
                   "circuit integré des missions",
-                  tex: 0.8,
+                  tex: TailleText(context).contenu,
                 ),
               ],
             )),

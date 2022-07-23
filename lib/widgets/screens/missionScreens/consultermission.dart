@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-
 import '../../../models/custom_text.dart';
 import '../../../models/infos.dart';
 import '../../../modelsrequest/getresponse.dart';
 
 class ConsulterMission extends StatefulWidget {
-  final getReponse element;
+  final GetMissionUser element;
   const ConsulterMission({Key? key, required this.element}) : super(key: key);
 
   @override
@@ -18,7 +16,7 @@ class _ConsulterMissionState extends State<ConsulterMission> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: CustomText("Consulter Mission ", tex: 1.2),
+        title: CustomText("Consulter Mission ",  tex: TailleText(context).titre,),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
